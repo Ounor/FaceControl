@@ -1,8 +1,9 @@
-import React, {useState, useEffect, useRef} from 'react';
-import AudioController from './audioController';
+import React, {useState, useEffect} from 'react';
+import AudioController from '@/app/components/audioController';
+import FaceCamera from "@/app/components/faceCamera";
 
 // Определение типов для эмоций
-type Emotion = 'sadness' | 'smile' | 'indifference';
+type Emotion = 'surprised' | 'happy' | 'neutral';
 
 interface Circle {
     lane: number;
@@ -18,12 +19,12 @@ const Game: React.FC = () => {
     const [score, setScore] = useState<number>(0);
     const speed = 2; // Скорость движения кругов
     const [BPM, setBPM] = useState(0);
-    const beatInterval = 60 / BPM; // Время между тактами в секундах
-    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const [currentEmotion, setCurrentEmotion] = useState<string>('neutral')
 
+    const beatInterval = 30 / BPM; // Время между тактами в секундах
     // Функция для случайной эмоции
     const getRandomEmotion = (): Emotion => {
-        const emotions: Emotion[] = ['sadness', 'smile', 'indifference'];
+        const emotions: Emotion[] = ['surprised', 'happy', 'neutral'];
         return emotions[Math.floor(Math.random() * emotions.length)];
     };
 
@@ -40,8 +41,28 @@ const Game: React.FC = () => {
     };
 
     useEffect(() => {
-        getVideo();
-    }, [videoRef]);
+        // setCircles((prevCircles) => {
+        //     let hit = false;
+        //     const updatedCircles = prevCircles.filter(circle => {
+        //         if (
+        //             circle.emotion === currentEmotion &&
+        //             circle.position > 80
+        //         ) {
+        //             hit = true;
+        //             const accuracy = 1 - Math.abs(circle.position - 90) / 10;
+        //             setScore(prevScore => prevScore + Math.floor(accuracy * 100)); // Начисляем очки
+        //             return false; // Убираем круг после попадания
+        //         }
+        //         return true; // Оставляем остальные круги
+        //     });
+        //
+        //     if (!hit) {
+        //         console.log("Мимо!");
+        //     }
+        //     return updatedCircles;
+        // });
+    }, [currentEmotion]);
+
 
     // Обновление позиции кругов
     useEffect(() => {
@@ -58,21 +79,6 @@ const Game: React.FC = () => {
 
         return () => clearInterval(interval);
     }, []);
-
-    const getVideo = () => {
-        navigator.mediaDevices
-            .getUserMedia({ video: true })
-            .then(stream => {
-                const video = videoRef.current;
-                if (video) {
-                    video.srcObject = stream;
-                    video.play();
-                }
-            })
-            .catch(err => {
-                console.error("error:", err);
-            });
-    };
 
     // Обработчик нажатия клавиш
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -120,25 +126,24 @@ const Game: React.FC = () => {
     // Отображение кружков с разными эмоциями
     const renderCircleEmotion = (emotion: Emotion) => {
         switch (emotion) {
-            case 'sadness':
-                return '😢';
-            case 'smile':
-                return '😊';
-            case 'indifference':
+            case 'surprised':
+                return '😯';
+            case 'happy':
+                return '😃';
+            case 'neutral':
                 return '😐';
             default:
-                return '';
+                return '😐';
         }
     };
 
     return (
         <div className="flex flex-col items-center z-1">
-            <video className="aspect-square rounded-full w-1/6 h-1/6" ref={videoRef} autoPlay id="videoElement" />
-
+            <FaceCamera onChangeEmotion={setCurrentEmotion} />
             <div className="mb-4 text-2xl font-bold">Счет: {score}</div>
 
             <AudioController onSetBPM={handleSetBpm} onTimeUpdate={handleTimeUpdate} />
-
+            {renderCircleEmotion(currentEmotion as "surprised" | "happy" | "neutral")}
             <div className="flex">
                 {lanes.map((lane) => (
                     <div key={lane} className="w-24 h-96 bg-gray-800 m-2 relative overflow-hidden">
