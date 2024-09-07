@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import AudioController from '@/app/components/audioController';
 import FaceCamera from "@/app/components/faceCamera";
+import Navbar from './navbar';
 
 // Определение типов для эмоций
 type Emotion = 'surprised' | 'happy' | 'neutral';
@@ -139,6 +140,9 @@ const Game: React.FC = () => {
 
     return (
         <div className="flex flex-col items-center z-1">
+            <div className='mt-4'>
+                <Navbar/>
+            </div>
             <FaceCamera onChangeEmotion={setCurrentEmotion} />
             <div className="mb-4 text-2xl font-bold">Счет: {score}</div>
 
@@ -161,6 +165,7 @@ const Game: React.FC = () => {
                     </div>
                 ))}
             </div>
+           
         </div>
     );
 };
