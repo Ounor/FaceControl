@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import AudioController from '@/app/components/audioController';
 import FaceCamera from "@/app/components/faceCamera";
+import Navbar from './navbar';
 
 type Emotion = 'surprised' | 'happy' | 'neutral';
 
