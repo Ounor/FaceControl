@@ -11,8 +11,13 @@ interface Emotions {
     surprised: number;
 }
 
+interface Props {
+    onChangeEmotion: (emotion: string) => void;
+    wrong: boolean;
+    success: boolean;
+}
 
-const FaceCamera = (props: any) => {
+const FaceCamera = (props: Props) => {
     const [modelsLoaded, setModelsLoaded] = useState<boolean>(false);
     const [captureVideo, setCaptureVideo] = useState<boolean>(true);
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -20,7 +25,7 @@ const FaceCamera = (props: any) => {
 
     // Загрузка моделей
     useEffect(() => {
-        startVideo()
+        startVideo();
 
         const loadModels = async () => {
             const MODEL_URL = '/models';
@@ -62,12 +67,9 @@ const FaceCamera = (props: any) => {
             }
         }
 
-
         return maxEmotion;
     };
 
-
-    // Обработка воспроизведения видео
     const handleVideoOnPlay = () => {
         setInterval(async () => {
             if (canvasRef.current && videoRef.current) {
@@ -76,34 +78,44 @@ const FaceCamera = (props: any) => {
                 const detections = await faceapi
                     .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
                     .withFaceLandmarks()
-                    .withFaceExpressions() || 'neutral';
+                    .withFaceExpressions();
 
-
-                props.onChangeEmotion(getDominantEmotion(detections[0]?.expressions))
-
+                if (detections?.length) {
+                    props.onChangeEmotion(getDominantEmotion(detections[0]?.expressions));
+                }
             }
         }, 100);
     };
 
+    // Генерация классов для анимаций в зависимости от состояния
+    const videoClassName = props.success
+        ? 'video-shadow-success'
+        : props.wrong
+            ? 'video-shake'
+            : '';
+
     return (
         <div>
-            {captureVideo ?
-                modelsLoaded ?
+            {captureVideo ? (
+                modelsLoaded ? (
                     <div>
                         <video
                             onPlay={handleVideoOnPlay}
-                            className="aspect-square rounded-full" ref={videoRef} autoPlay
-                            id="videoElement"/>
-
-
-                        <canvas ref={canvasRef} style={{position: 'absolute'}}/>
+                            className={`aspect-square rounded-full ${videoClassName}`}
+                            ref={videoRef}
+                            autoPlay
+                            id="videoElement"
+                        />
+                        <canvas ref={canvasRef} style={{ position: 'absolute' }} />
                     </div>
-                    :
+                ) : (
                     <div>Загрузка...</div>
-                :
-                <></>}
+                )
+            ) : (
+                <></>
+            )}
         </div>
     );
-}
+};
 
 export default FaceCamera;

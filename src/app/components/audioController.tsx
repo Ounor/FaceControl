@@ -47,7 +47,7 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
     const [uploading, setUploading] = useState<boolean>(false); // Статус загрузки
     const [progress, setProgress] = useState<number>(0); // Прогресс загрузки
     const [audioSrc, setAudioSrc] = useState<string | undefined>(undefined); // Хранит путь к выбранному аудиофайлу
-    let { height, width } = useWindowDimensions();
+    const { height, width } = useWindowDimensions();
 
     useEffect(() => {
         const handleTimeUpdate = () => {
@@ -59,21 +59,15 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
         if (audioElementRef.current) {
             audioElementRef?.current.addEventListener('timeupdate', handleTimeUpdate);
         }
-        resizeCanvas();
         return () => {
             if (audioElementRef.current) {
                 // eslint-disable-next-line react-hooks/exhaustive-deps
                 audioElementRef?.current.removeEventListener('timeupdate', handleTimeUpdate);
             }
         };
-    }, [onTimeUpdate, height, width]);
+    }, [onTimeUpdate]);
 
-    const resizeCanvas = () => {
-        width = window.innerWidth
-        height = window.innerHeight
-    }
 
-    resizeCanvas();
     // Округление значения BPM
     const roundBPM = (value: number): number => {
         return Math.round(value * 10) / 10;
@@ -169,7 +163,6 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
 
     return (
         <div className={'content-center'}>
-            <audio id={'audio-element'} ref={audioElementRef} src={audioSrc} preload="auto"></audio>
             <div className=''>
 
             {!songs.length && (
@@ -231,23 +224,25 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
             )}
             </div>
 
-            <div className={'fixed w-full bottom-0 left-0'} style={{'z-index': '-1'}}>
-            <AudioSpectrum
-                id="audio-canvas"
-                height={height}
-                width={width}
-                audioId={'audio-element'}
-                capColor={'red'}
-                capHeight={2}
-                meterWidth={2}
-                meterCount={512}
-                meterColor={[
-                    {stop: 0, color: '#f00'},
-                    {stop: 0.5, color: '#0CD7FD'},
-                    {stop: 1, color: 'red'}
-                ]}
-                gap={4}
-            />
+            <div className={'pointer-events-none absolute w-full bottom-0 left-0'}>
+                <audio id={'audio-element'} ref={audioElementRef} src={audioSrc} preload="auto"></audio>
+
+                <AudioSpectrum
+                    id="audio-canvas"
+                    height={600}
+                    width={width}
+                    audioId={'audio-element'}
+                    capColor={'red'}
+                    capHeight={2}
+                    meterWidth={2}
+                    meterCount={256}
+                    meterColor={[
+                        {stop: 0, color: '#f00'},
+                        {stop: 0.5, color: '#0CD7FD'},
+                        {stop: 1, color: 'red'}
+                    ]}
+                    gap={4}
+                />
             </div>
         </div>
     );

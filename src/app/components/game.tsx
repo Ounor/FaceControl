@@ -1,9 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import AudioController from '@/app/components/audioController';
 import FaceCamera from "@/app/components/faceCamera";
 import Navbar from './navbar';
 
-// Определение типов для эмоций
 type Emotion = 'surprised' | 'happy' | 'neutral';
 
 interface Circle {
@@ -18,18 +17,49 @@ const Game: React.FC = () => {
     const [circles, setCircles] = useState<Circle[]>([]);
     const [lastBeatTime, setLastBeatTime] = useState<number>(0);
     const [score, setScore] = useState<number>(0);
-    const speed = 2; // Скорость движения кругов
     const [BPM, setBPM] = useState(0);
-    const [currentEmotion, setCurrentEmotion] = useState<string>('neutral')
+    const [currentEmotion, setCurrentEmotion] = useState<string>('neutral');
+    const [success, setSuccess] = useState<boolean>(false); // Состояние успеха
+    const [wrong, setWrong] = useState<boolean>(false); // Состояние ошибки
+    const speed = 2; // Скорость движения кругов
 
-    const beatInterval = 30 / BPM; // Время между тактами в секундах
-    // Функция для случайной эмоции
+    const beatInterval = 120 / BPM;
+
+    // Обновление игрового таймера каждую секунду
+    useEffect(() => {
+        const timer = setInterval(() => {
+            console.log(currentEmotion)
+
+            setCircles((prevCircles) => {
+                return prevCircles.filter(circle => {
+                    if (circle.position > 80) {
+                        if ( circle.emotion === currentEmotion ) {
+                            setSuccess(true);
+                            setWrong(false)
+                            setScore(prevScore => prevScore + 100);
+                            return false;
+                        } else if (circle.emotion !== currentEmotion) {
+                            setWrong(true); // Устанавливаем ошибку
+                            setSuccess(false); // Устанавливаем успех
+                            setScore(prevScore => prevScore > 0 ? prevScore - 50 : 0);
+                            setTimeout(() => setWrong(false), 1000); // Через 2 секунды сбрасываем ошибку
+                            return false;
+
+                        }
+                    }
+                    return true;
+                });
+            });
+        }, 100);
+
+        return () => clearInterval(timer); // Очищаем таймер при размонтировании компонента
+    }, [currentEmotion]);
+
     const getRandomEmotion = (): Emotion => {
         const emotions: Emotion[] = ['surprised', 'happy', 'neutral'];
         return emotions[Math.floor(Math.random() * emotions.length)];
     };
 
-    // Функция вызывается при обновлении времени аудио
     const handleTimeUpdate = (currentTime: number) => {
         if (currentTime - lastBeatTime >= beatInterval) {
             const randomLane = Math.floor(Math.random() * lanes.length);
@@ -37,35 +67,11 @@ const Game: React.FC = () => {
                 ...prevCircles,
                 { lane: randomLane, position: 0, emotion: getRandomEmotion() }
             ]);
-            setLastBeatTime(currentTime); // Обновляем время последнего такта
+            setLastBeatTime(currentTime);
         }
     };
 
-    useEffect(() => {
-        // setCircles((prevCircles) => {
-        //     let hit = false;
-        //     const updatedCircles = prevCircles.filter(circle => {
-        //         if (
-        //             circle.emotion === currentEmotion &&
-        //             circle.position > 80
-        //         ) {
-        //             hit = true;
-        //             const accuracy = 1 - Math.abs(circle.position - 90) / 10;
-        //             setScore(prevScore => prevScore + Math.floor(accuracy * 100)); // Начисляем очки
-        //             return false; // Убираем круг после попадания
-        //         }
-        //         return true; // Оставляем остальные круги
-        //     });
-        //
-        //     if (!hit) {
-        //         console.log("Мимо!");
-        //     }
-        //     return updatedCircles;
-        // });
-    }, [currentEmotion]);
 
-
-    // Обновление позиции кругов
     useEffect(() => {
         const interval = setInterval(() => {
             setCircles((prevCircles) =>
@@ -74,19 +80,18 @@ const Game: React.FC = () => {
                         ...circle,
                         position: circle.position + speed
                     }))
-                    .filter(circle => circle.position < 100) // Удаляем круги, которые вышли за пределы экрана
+                    .filter(circle => circle.position < 100)
             );
         }, 50);
 
         return () => clearInterval(interval);
     }, []);
 
-    // Обработчик нажатия клавиш
     const handleKeyPress = (event: KeyboardEvent) => {
         const keyMap: Record<string, number> = {
-            'a': 0, // левая полоса
-            's': 1, // средняя полоса
-            'd': 2  // правая полоса
+            'a': 0,
+            's': 1,
+            'd': 2
         };
 
         const pressedLane = keyMap[event.key];
@@ -101,13 +106,17 @@ const Game: React.FC = () => {
                     ) {
                         hit = true;
                         const accuracy = 1 - Math.abs(circle.position - 90) / 10;
-                        setScore(prevScore => prevScore + Math.floor(accuracy * 100)); // Начисляем очки
-                        return false; // Убираем круг после попадания
+                        setScore(prevScore => prevScore + Math.floor(accuracy * 100));
+                        setSuccess(true); // Устанавливаем успех
+                        setTimeout(() => setSuccess(false), 2000); // Через 2 секунды сбрасываем успех
+                        return false;
                     }
-                    return true; // Оставляем остальные круги
+                    return true;
                 });
 
                 if (!hit) {
+                    setWrong(true); // Устанавливаем ошибку
+                    setTimeout(() => setWrong(false), 2000); // Через 2 секунды сбрасываем ошибку
                     console.log("Мимо!");
                 }
                 return updatedCircles;
@@ -124,7 +133,6 @@ const Game: React.FC = () => {
 
     const handleSetBpm = (value: number) => setBPM(value);
 
-    // Отображение кружков с разными эмоциями
     const renderCircleEmotion = (emotion: Emotion) => {
         switch (emotion) {
             case 'surprised':
@@ -140,14 +148,8 @@ const Game: React.FC = () => {
 
     return (
         <div className="flex flex-col items-center z-1">
-            <div className='mt-4'>
-                <Navbar/>
-            </div>
-            <FaceCamera onChangeEmotion={setCurrentEmotion} />
             <div className="mb-4 text-2xl font-bold">Счет: {score}</div>
-
             <AudioController onSetBPM={handleSetBpm} onTimeUpdate={handleTimeUpdate} />
-            {renderCircleEmotion(currentEmotion as "surprised" | "happy" | "neutral")}
             <div className="flex">
                 {lanes.map((lane) => (
                     <div key={lane} className="w-24 h-96 bg-gray-800 m-2 relative overflow-hidden">
@@ -165,7 +167,8 @@ const Game: React.FC = () => {
                     </div>
                 ))}
             </div>
-           
+            <FaceCamera success={success} wrong={wrong} onChangeEmotion={setCurrentEmotion} />
+
         </div>
     );
 };
