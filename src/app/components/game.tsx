@@ -95,7 +95,6 @@ const Game: React.FC = ({setAudioSrc, audioSrc}) => {
 
     return (
         <div className="flex flex-col items-center z-1">
-            {/* Вывод текущего счета */}
             <div className="mb-4 text-2xl font-bold">Счет: {score}</div>
             <AudioController onSetBPM={handleSetBpm} onTimeUpdate={handleTimeUpdate} setAudioSrc={setAudioSrc} audioSrc={audioSrc}/>
             <div className="flex">

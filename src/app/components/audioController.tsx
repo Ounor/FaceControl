@@ -16,7 +16,9 @@ import {
     PlayCircleOutlined,
     UploadOutlined
 } from '@ant-design/icons';
-import { Spectrum } from '../components/spectrum/spectrum';
+// import { Spectrum } from '../components/spectrum/spectrum';
+import AudioSpectrum from "react-audio-spectrum";
+import useWindowDimensions from "@/app/helpers/useWindowDimensions";
 
 // Интерфейс для пропсов
 interface AudioControllerProps {
@@ -45,6 +47,7 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
     const [songs, setSongs] = useState<Song[]>([]); // Массив песен с типизацией
     const [uploading, setUploading] = useState<boolean>(false); // Статус загрузки
     const [progress, setProgress] = useState<number>(0); // Прогресс загрузки
+    const { height, width } = useWindowDimensions();
 
     useEffect(() => {
         const handleTimeUpdate = () => {
@@ -160,7 +163,7 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
 
     return (
         <div className={'content-center'}>
-            <audio ref={audioElementRef} src={audioSrc} preload="auto"></audio>
+            <audio id={'audio-element'} ref={audioElementRef} src={audioSrc} preload="auto"></audio>
 
             {!songs.length && (
                 <Upload
@@ -216,9 +219,24 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
                     )}
                 />
             )}
-            {
-               !uploading && songs.length > 0 && <Spectrum audioUrl = {audioSrc}/>
-            }
+            <div className={'absolute w-full bottom-0 left-0'}>
+            <AudioSpectrum
+                id="audio-canvas"
+                height={500}
+                width={width}
+                audioId={'audio-element'}
+                capColor={'red'}
+                capHeight={2}
+                meterWidth={2}
+                meterCount={512}
+                meterColor={[
+                    {stop: 0, color: '#f00'},
+                    {stop: 0.5, color: '#0CD7FD'},
+                    {stop: 1, color: 'red'}
+                ]}
+                gap={4}
+            />
+            </div>
         </div>
     );
 };

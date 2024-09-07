@@ -8,13 +8,12 @@ function App() {
   console.log(audioSrc)
   return (
       <div className="App">
-        <div className='z-0 absolute'>
-          <Spectrum audioUrl={audioSrc}/>
-        </div>
+        {/*<div className='z-0 absolute'>*/}
+        {/*  <Spectrum audioUrl={audioSrc}/>*/}
+        {/*</div>*/}
         <Game setAudioSrc={setAudioSrc} audioSrc={audioSrc}/>
       </div>
   );
 }
 
 export default App;
- 
