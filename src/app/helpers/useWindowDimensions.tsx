@@ -1,30 +1,39 @@
+'use client'
 import { useState, useEffect } from 'react';
 
-export default function useWindowDimensions() {
+// Интерфейс для размеров окна
+interface WindowDimensions {
+    width: number;
+    height: number;
+}
 
-    const hasWindow = typeof window !== 'undefined';
-
-    function getWindowDimensions() {
-        const width = hasWindow ? window.innerWidth : null;
-        const height = hasWindow ? window.innerHeight : null;
+export default function useWindowDimensions(): WindowDimensions {
+    // Функция для получения размеров окна
+    function getWindowDimensions(windowObj: (Window & typeof globalThis) | undefined) {
+        const width =  windowObj?.innerWidth || 0;
+        const height = windowObj?.innerHeight || 0;
         return {
             width,
             height,
         };
     }
 
-    const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
+    const [windowDimensions, setWindowDimensions] = useState<WindowDimensions>();
+
 
     useEffect(() => {
-        if (hasWindow) {
-            function handleResize() {
-                setWindowDimensions(getWindowDimensions());
-            }
+        // Обновляем размеры окна при монтировании
+        setWindowDimensions(getWindowDimensions(window));
 
-            window.addEventListener('resize', handleResize);
-            return () => window.removeEventListener('resize', handleResize);
+        function handleResize() {
+            setWindowDimensions(getWindowDimensions(window));
         }
-    }, [hasWindow]);
 
-    return windowDimensions;
+        window.addEventListener('resize', handleResize);
+
+        // Очищаем обработчик при размонтировании
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return windowDimensions as WindowDimensions;
 }

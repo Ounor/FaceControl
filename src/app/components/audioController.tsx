@@ -16,13 +16,13 @@ import {
     PlayCircleOutlined,
     UploadOutlined
 } from '@ant-design/icons';
-// import { Spectrum } from '../components/spectrum/spectrum';
 import AudioSpectrum from "react-audio-spectrum";
 import useWindowDimensions from "@/app/helpers/useWindowDimensions";
 
 // Интерфейс для пропсов
 interface AudioControllerProps {
-    onTimeUpdate: (currentTime: number) => void; // Функция для обновления времени
+    onTimeUpdate: (currentTime: number) => void;
+    onSetBPM: (bpm: number) => void;
 }
 
 // Интерфейс для песни (файла)
@@ -37,17 +37,17 @@ const audioFileTypes = ['.mp3', '.wav', '.aac', '.ogg', '.flac'];
 
 // Функция для создания случайной задержки
 const getRandomDelay = (): number => {
-    return Math.floor(Math.random() * 3000) + 2000; // Random delay between 2s and 4s
+    return Math.floor(Math.random() * 3000) + 2000; // Задержка от 2 до 4 секунд
 };
 
 // Компонент AudioController с типизацией
-const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBPM: onSetBPM, setAudioSrc, audioSrc}) => {
+const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBPM }) => {
     const audioElementRef = useRef<HTMLAudioElement | null>(null);
-    // const [audioSrc, setAudioSrc] = useState<string | undefined>(undefined); // Хранит путь к выбранному аудиофайлу
     const [songs, setSongs] = useState<Song[]>([]); // Массив песен с типизацией
     const [uploading, setUploading] = useState<boolean>(false); // Статус загрузки
     const [progress, setProgress] = useState<number>(0); // Прогресс загрузки
-    const { height, width } = useWindowDimensions();
+    const { width } = useWindowDimensions();
+    const [audioSrc, setAudioSrc] = useState<string | undefined>(undefined); // Хранит путь к выбранному аудиофайлу
 
     useEffect(() => {
         const handleTimeUpdate = () => {
@@ -57,12 +57,13 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
         };
 
         if (audioElementRef.current) {
-            audioElementRef.current.addEventListener('timeupdate', handleTimeUpdate);
+            audioElementRef?.current.addEventListener('timeupdate', handleTimeUpdate);
         }
 
         return () => {
             if (audioElementRef.current) {
-                audioElementRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+                // eslint-disable-next-line react-hooks/exhaustive-deps
+                audioElementRef?.current.removeEventListener('timeupdate', handleTimeUpdate);
             }
         };
     }, [onTimeUpdate]);
@@ -102,13 +103,13 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
                 setUploading(false);
                 setProgress(0);
 
-                onSetBPM(bpm)
+                onSetBPM(bpm);
 
                 setSongs((prevSongs) =>
                     prevSongs.map((s) => (s.file === file ? { ...s, bpm } : s))
                 );
 
-                message.success(`${file.name} Проанализирован и готов!`);
+                message.success(`${file.name} проанализирован и готов!`);
             }
         };
 
@@ -139,7 +140,6 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
 
     // Функция для обработки загрузки файла
     const handleFileUpload = (file: File) => {
-        console.log(file);
         if (file) {
             const fileURL = URL.createObjectURL(file); // Создаем URL для локального аудиофайла
             setAudioSrc(fileURL); // Устанавливаем аудиофайл как источник
@@ -168,11 +168,12 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
             {!songs.length && (
                 <Upload
                     beforeUpload={() => false}
+                    // @ts-ignore
                     onChange={(info) => handleFileUpload(info.file)}
                     showUploadList={false}
                     accept={audioFileTypes.join(',')}
                 >
-                    <Button icon={<UploadOutlined/>} disabled={uploading}>
+                    <Button icon={<UploadOutlined />} disabled={uploading}>
                         Выбери песню
                     </Button>
                 </Upload>
@@ -180,14 +181,16 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
 
             {songs.length > 0 && (
                 <div className={'flex-row flex content-center justify-between'}>
-                    <Space><Button onClick={playAudio} icon={<PlayCircleOutlined/>}>
-                        Играть
-                    </Button>
+                    <Space>
+                        <Button onClick={playAudio} icon={<PlayCircleOutlined />}>
+                            Играть
+                        </Button>
                     </Space>
                     <Space>
-                        <Button onClick={pauseAudio} icon={<PauseOutlined/>}>
+                        <Button onClick={pauseAudio} icon={<PauseOutlined />}>
                             Пауза
-                        </Button></Space>
+                        </Button>
+                    </Space>
                 </div>
             )}
 
@@ -195,20 +198,20 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
                 <div className="progress-container w-full content-center mv-15">
                     <Progress
                         percent={progress}
-                        percentPosition={{align: 'end', type: 'inner'}}
                         size={[300, 20]}
                     />
                 </div>
             )}
 
-            {/* Отображение загруженных песен и их BPM */}
             {songs.length > 0 && !uploading && (
                 <List
                     dataSource={songs}
                     renderItem={(song) => (
                         <List.Item>
                             <Space>
-                                <Typography.Text className={'text-gray-50'}>{song.file.name}</Typography.Text>
+                                <Typography.Text className={'text-gray-50'}>
+                                    {song.file.name}
+                                </Typography.Text>
                                 {song.bpm && (
                                     <Typography.Text className={'text-white'}>
                                         BPM: {song.bpm}
@@ -219,23 +222,24 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
                     )}
                 />
             )}
+
             <div className={'absolute w-full bottom-0 left-0'}>
-            <AudioSpectrum
-                id="audio-canvas"
-                height={500}
-                width={width}
-                audioId={'audio-element'}
-                capColor={'red'}
-                capHeight={2}
-                meterWidth={2}
-                meterCount={512}
-                meterColor={[
-                    {stop: 0, color: '#f00'},
-                    {stop: 0.5, color: '#0CD7FD'},
-                    {stop: 1, color: 'red'}
-                ]}
-                gap={4}
-            />
+                <AudioSpectrum
+                    id="audio-canvas"
+                    height={500}
+                    width={width}
+                    audioId={'audio-element'}
+                    capColor={'red'}
+                    capHeight={2}
+                    meterWidth={2}
+                    meterCount={512}
+                    meterColor={[
+                        { stop: 0, color: '#f00' },
+                        { stop: 0.5, color: '#0CD7FD' },
+                        { stop: 1, color: 'red' }
+                    ]}
+                    gap={4}
+                />
             </div>
         </div>
     );
