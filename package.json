@@ -13,6 +13,7 @@
     "antd": "^5.20.5",
     "next": "14.2.8",
     "react": "^18",
+    "react-audio-spectrum": "^0.1.5",
     "react-dom": "^18",
     "web-audio-beat-detector": "^8.2.14"
   },

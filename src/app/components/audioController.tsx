@@ -16,6 +16,7 @@ import {
     PlayCircleOutlined,
     UploadOutlined
 } from '@ant-design/icons';
+import { Spectrum } from '../components/spectrum/spectrum';
 
 // Интерфейс для пропсов
 interface AudioControllerProps {
@@ -215,6 +216,9 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
                     )}
                 />
             )}
+            {
+               !uploading && songs.length > 0 && <Spectrum audioUrl = {audioSrc}/>
+            }
         </div>
     );
 };
