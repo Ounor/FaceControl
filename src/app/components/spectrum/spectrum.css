@@ -10,5 +10,6 @@
       ),
       linear-gradient(90deg, rgba(12, 94, 12, 0.3) 0.1px, transparent 0.1em);
     background-size: 5px 5px;
+    opacity: 80%;
   }
   
