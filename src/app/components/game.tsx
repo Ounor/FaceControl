@@ -10,7 +10,7 @@ interface Circle {
 
 const lanes = [0, 1, 2]; // Три полосы
 
-const Game: React.FC = () => {
+const Game: React.FC = ({setAudioSrc, audioSrc}) => {
     const [circles, setCircles] = useState<Circle[]>([]);
     const [lastBeatTime, setLastBeatTime] = useState<number>(0);
     const [score, setScore] = useState<number>(0); // Добавляем состояние для счета
@@ -94,10 +94,10 @@ const Game: React.FC = () => {
 
 
     return (
-        <div className="flex flex-col items-center mt-10">
+        <div className="flex flex-col items-center z-1">
             {/* Вывод текущего счета */}
             <div className="mb-4 text-2xl font-bold">Счет: {score}</div>
-            <AudioController onSetBPM={handleSetBpm} onTimeUpdate={handleTimeUpdate} />
+            <AudioController onSetBPM={handleSetBpm} onTimeUpdate={handleTimeUpdate} setAudioSrc={setAudioSrc} audioSrc={audioSrc}/>
             <div className="flex">
                 {lanes.map((lane) => (
                     <div key={lane} className="w-24 h-96 bg-gray-800 m-2 relative overflow-hidden">

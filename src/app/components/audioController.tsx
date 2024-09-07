@@ -39,9 +39,9 @@ const getRandomDelay = (): number => {
 };
 
 // Компонент AudioController с типизацией
-const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBPM: onSetBPM}) => {
+const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBPM: onSetBPM, setAudioSrc, audioSrc}) => {
     const audioElementRef = useRef<HTMLAudioElement | null>(null);
-    const [audioSrc, setAudioSrc] = useState<string | undefined>(undefined); // Хранит путь к выбранному аудиофайлу
+    // const [audioSrc, setAudioSrc] = useState<string | undefined>(undefined); // Хранит путь к выбранному аудиофайлу
     const [songs, setSongs] = useState<Song[]>([]); // Массив песен с типизацией
     const [uploading, setUploading] = useState<boolean>(false); // Статус загрузки
     const [progress, setProgress] = useState<number>(0); // Прогресс загрузки
