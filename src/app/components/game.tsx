@@ -1,28 +1,31 @@
-"use client";
-
-import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import AudioController from './audioController';
 
-// Определение типов
+// Определение типов для эмоций
+type Emotion = 'sadness' | 'smile' | 'indifference';
+
 interface Circle {
     lane: number;
     position: number;
-}
-
-interface GameProps {
-    setAudioSrc: (src: string) => void;
+    emotion: Emotion;
 }
 
 const lanes = [0, 1, 2]; // Три полосы
 
-const Game: React.FC<GameProps> = () => {
+const Game: React.FC = () => {
     const [circles, setCircles] = useState<Circle[]>([]);
     const [lastBeatTime, setLastBeatTime] = useState<number>(0);
     const [score, setScore] = useState<number>(0);
-    const [BPM, setBPM] = useState<number>(0);
-    const beatInterval = 60 / BPM; // Время между тактами в секундах
-    const videoRef = useRef<HTMLVideoElement>(null);
     const speed = 2; // Скорость движения кругов
+    const [BPM, setBPM] = useState(0);
+    const beatInterval = 60 / BPM; // Время между тактами в секундах
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+
+    // Функция для случайной эмоции
+    const getRandomEmotion = (): Emotion => {
+        const emotions: Emotion[] = ['sadness', 'smile', 'indifference'];
+        return emotions[Math.floor(Math.random() * emotions.length)];
+    };
 
     // Функция вызывается при обновлении времени аудио
     const handleTimeUpdate = (currentTime: number) => {
@@ -30,7 +33,7 @@ const Game: React.FC<GameProps> = () => {
             const randomLane = Math.floor(Math.random() * lanes.length);
             setCircles((prevCircles) => [
                 ...prevCircles,
-                { lane: randomLane, position: 0 }
+                { lane: randomLane, position: 0, emotion: getRandomEmotion() }
             ]);
             setLastBeatTime(currentTime); // Обновляем время последнего такта
         }
@@ -38,7 +41,7 @@ const Game: React.FC<GameProps> = () => {
 
     useEffect(() => {
         getVideo();
-    }, []);
+    }, [videoRef]);
 
     // Обновление позиции кругов
     useEffect(() => {
@@ -106,15 +109,27 @@ const Game: React.FC<GameProps> = () => {
     };
 
     useEffect(() => {
-        // @ts-ignore
         window.addEventListener('keydown', handleKeyPress);
         return () => {
-            // @ts-expect-error
             window.removeEventListener('keydown', handleKeyPress);
         };
     }, []);
 
     const handleSetBpm = (value: number) => setBPM(value);
+
+    // Отображение кружков с разными эмоциями
+    const renderCircleEmotion = (emotion: Emotion) => {
+        switch (emotion) {
+            case 'sadness':
+                return '😢';
+            case 'smile':
+                return '😊';
+            case 'indifference':
+                return '😐';
+            default:
+                return '';
+        }
+    };
 
     return (
         <div className="flex flex-col items-center z-1">
@@ -132,9 +147,11 @@ const Game: React.FC<GameProps> = () => {
                             .map((circle, index) => (
                                 <div
                                     key={index}
-                                    className="absolute w-12 h-12 bg-blue-500 rounded-full"
+                                    className="absolute w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-2xl"
                                     style={{ top: `${circle.position}%`, left: '25%' }}
-                                ></div>
+                                >
+                                    {renderCircleEmotion(circle.emotion)}
+                                </div>
                             ))}
                     </div>
                 ))}
