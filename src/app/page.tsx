@@ -1,5 +1,6 @@
 'use client'
 import Game from './components/game';
+import Modal from './components/modal';
 
 function App() {
   return (

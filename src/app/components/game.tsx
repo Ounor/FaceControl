@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import AudioController from './audioController';
+import Navbar from './navbar';
 
 // Определение типов для эмоций
 type Emotion = 'sadness' | 'smile' | 'indifference';
@@ -133,6 +134,9 @@ const Game: React.FC = () => {
 
     return (
         <div className="flex flex-col items-center z-1">
+            <div className='mt-4'>
+                <Navbar/>
+            </div>
             <video className="aspect-square rounded-full w-1/6 h-1/6" ref={videoRef} autoPlay id="videoElement" />
 
             <div className="mb-4 text-2xl font-bold">Счет: {score}</div>
@@ -156,6 +160,7 @@ const Game: React.FC = () => {
                     </div>
                 ))}
             </div>
+           
         </div>
     );
 };
