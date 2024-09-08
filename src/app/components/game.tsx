@@ -148,6 +148,8 @@ const Game: React.FC = () => {
     return (
         <div className="flex flex-col items-center z-1">
             <div className="mb-4 text-2xl font-bold">Счет: {score}</div>
+            <FaceCamera success={success} wrong={wrong} onChangeEmotion={setCurrentEmotion} />
+
             <AudioController onSetBPM={handleSetBpm} onTimeUpdate={handleTimeUpdate} />
             <div className="flex">
                 {lanes.map((lane) => (
@@ -166,8 +168,6 @@ const Game: React.FC = () => {
                     </div>
                 ))}
             </div>
-            <FaceCamera success={success} wrong={wrong} onChangeEmotion={setCurrentEmotion} />
-
         </div>
     );
 };

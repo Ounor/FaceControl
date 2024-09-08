@@ -1,5 +1,6 @@
 import * as faceapi from 'face-api.js';
 import React, { useEffect, useRef, useState } from 'react';
+import { unstable_noStore as noStore } from 'next/cache';
 
 interface Emotions {
     angry: number;
@@ -18,6 +19,8 @@ interface Props {
 }
 
 const FaceCamera = (props: Props) => {
+    noStore();
+
     const [modelsLoaded, setModelsLoaded] = useState<boolean>(false);
     const [captureVideo, setCaptureVideo] = useState<boolean>(true);
     const videoRef = useRef<HTMLVideoElement | null>(null);

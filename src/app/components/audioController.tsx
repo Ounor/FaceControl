@@ -224,7 +224,7 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
             )}
             </div>
 
-            <div className={'pointer-events-none absolute w-full bottom-0 left-0'}>
+            <div className={'opacity-25 pointer-events-none absolute w-full bottom-0 left-0 z-0'}>
                 <audio id={'audio-element'} ref={audioElementRef} src={audioSrc} preload="auto"></audio>
 
                 <AudioSpectrum
@@ -241,7 +241,7 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
                         {stop: 0.5, color: '#0CD7FD'},
                         {stop: 1, color: 'red'}
                     ]}
-                    gap={4}
+                    gap={14}
                 />
             </div>
         </div>
