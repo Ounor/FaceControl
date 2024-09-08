@@ -47,7 +47,7 @@ const AudioController: React.FC<AudioControllerProps> = ({ onTimeUpdate, onSetBP
     const [uploading, setUploading] = useState<boolean>(false); // Статус загрузки
     const [progress, setProgress] = useState<number>(0); // Прогресс загрузки
     const [audioSrc, setAudioSrc] = useState<string | undefined>(undefined); // Хранит путь к выбранному аудиофайлу
-    const { height, width } = useWindowDimensions();
+    const {  width } = useWindowDimensions();
 
     useEffect(() => {
         const handleTimeUpdate = () => {
